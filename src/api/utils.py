@@ -1,4 +1,7 @@
 from flask import jsonify, url_for
+from supabase import create_client, Client
+import os
+from datetime import datetime, timedelta
 
 class APIException(Exception):
     status_code = 400
@@ -39,3 +42,31 @@ def generate_sitemap(app):
         <p>Start working on your project by following the <a href="https://start.4geeksacademy.com/starters/full-stack" target="_blank">Quick Start</a></p>
         <p>Remember to specify a real endpoint path like: </p>
         <ul style="text-align: left;">"""+links_html+"</ul></div>"
+
+# Supabase client setup
+url: str = os.getenv("SUPABASE_URL")
+key: str = os.getenv("SUPABASE_KEY")
+supabase: Client = create_client(url, key)
+
+def execute_sql_query(sql_query):
+    try:
+        response = supabase.rpc('execute_sql', {'query': sql_query}).execute()
+        return response.data
+    except Exception as e:
+        raise APIException(f"Error executing SQL query: {str(e)}")
+
+def apply_date_filter(sql_query, date_field, start_date, end_date):
+    if not date_field or not start_date or not end_date:
+        return sql_query
+    
+    date_condition = f"WHERE {date_field} BETWEEN '{start_date}' AND '{end_date}'"
+    
+    if 'WHERE' in sql_query:
+        sql_query = sql_query.replace('WHERE', f'{date_condition} AND')
+    elif 'GROUP BY' in sql_query:
+        parts = sql_query.split('GROUP BY')
+        sql_query = f"{parts[0]} {date_condition} GROUP BY {parts[1]}"
+    else:
+        sql_query += f" {date_condition}"
+    
+    return sql_query

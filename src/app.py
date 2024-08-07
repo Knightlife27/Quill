@@ -1,25 +1,22 @@
-"""
-This module takes care of starting the API Server, Loading the DB and Adding the endpoints
-"""
 import os
 from flask import Flask, request, jsonify, url_for, send_from_directory
 from flask_migrate import Migrate
 from flask_swagger import swagger
-from api.utils import APIException, generate_sitemap
-from api.models import db
-from api.routes import api
-from api.admin import setup_admin
-from api.commands import setup_commands
+from flask_cors import CORS
+from dotenv import load_dotenv
+from supabase import create_client, Client
 
-# from models import Person
+# Load environment variables
+load_dotenv()
 
-ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
-static_file_dir = os.path.join(os.path.dirname(
-    os.path.realpath(__file__)), '../public/')
+# Create Flask app
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 
-# database condiguration
+# Enable CORS
+CORS(app)
+
+# Database configuration
 db_url = os.getenv("DATABASE_URL")
 if db_url is not None:
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url.replace(
@@ -28,37 +25,44 @@ else:
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/test.db"
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-MIGRATE = Migrate(app, db, compare_type=True)
+
+# Import models and initialize db after app creation
+from api.models import db
 db.init_app(app)
+MIGRATE = Migrate(app, db, compare_type=True)
 
-# add the admin
-setup_admin(app)
-
-# add the admin
-setup_commands(app)
-
-# Add all endpoints form the API with a "api" prefix
+# Import and register blueprints
+from api.routes import api
 app.register_blueprint(api, url_prefix='/api')
 
-# Handle/serialize errors like a JSON object
+# Import and setup admin
+from api.admin import setup_admin
+setup_admin(app)
 
+# Import and setup commands
+from api.commands import setup_commands
+setup_commands(app)
 
+# Import utils
+from api.utils import APIException, generate_sitemap
+
+# Environment setup
+ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
+static_file_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'public')
+
+# Error handler
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
 
-# generate sitemap with all your endpoints
-
-
+# Sitemap
 @app.route('/')
 def sitemap():
     if ENV == "development":
         return generate_sitemap(app)
     return send_from_directory(static_file_dir, 'index.html')
 
-# any other endpoint will try to serve it like a static file
-
-
+# Serve static files
 @app.route('/<path:path>', methods=['GET'])
 def serve_any_other_file(path):
     if not os.path.isfile(os.path.join(static_file_dir, path)):
@@ -67,8 +71,21 @@ def serve_any_other_file(path):
     response.cache_control.max_age = 0  # avoid cache memory
     return response
 
+# Supabase configuration
+url: str = os.getenv("SUPABASE_URL")
+key: str = os.getenv("SUPABASE_KEY")
+supabase: Client = create_client(url, key)
 
-# this only runs if `$ python src/main.py` is executed
+# Route to fetch chart data from Supabase
+@app.route('/api/charts', methods=['GET'])
+def get_charts():
+    try:
+        response = supabase.table('Chart').select('*').execute()
+        return jsonify(response.data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# This only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3001))
     app.run(host='0.0.0.0', port=PORT, debug=True)
