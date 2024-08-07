@@ -25,6 +25,7 @@ else:
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/test.db"
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ECHO'] = True  # Added this line to enable SQL query logging
 
 # Import models and initialize db after app creation
 from api.models import db
