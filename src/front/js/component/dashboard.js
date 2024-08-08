@@ -122,6 +122,8 @@ const Dashboard = ({ name, containerStyle, onClickDashboardItem }) => {
     return <div>Loading...</div>;
   }
 
+  console.log('Rendering Charts with Data:', filteredData);
+
   return (
     <div style={containerStyle}>
       <h2>{dashboard.dashboard.name}</h2>
