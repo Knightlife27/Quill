@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Chart from './chart';
+import ChartInput from './chartInput'; // Import the ChartInput component
 import { subDays, startOfMonth, isWithinInterval } from 'date-fns';
 import { BACKEND_URL } from './backendURL';
 import DateRangePicker from './dateRangePicker';
@@ -129,6 +130,10 @@ const Dashboard = ({ name, containerStyle, onClickDashboardItem }) => {
       <h2>{dashboard.dashboard.name}</h2>
       <PresetDateRangePicker onPresetChange={handleDateChange} />
       <DateRangePicker onChange={handleDateChange} />
+      
+      {/* Add the ChartInput component here */}
+      <ChartInput />
+
       <div>
         {filteredData.map(chart => (
           <Chart

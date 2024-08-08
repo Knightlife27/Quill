@@ -69,24 +69,6 @@ def get_dashboard(name):
         return jsonify({'error': 'Internal server error'}), 500
 
 @api.route('/chart/<id>', methods=['GET'])
-def get_chart_by_id(id):
-    logging.info(f"Fetching chart by ID: {id}")
-    try:
-        chart = Chart.query.get(id)
-        if not chart:
-            logging.warning(f"Chart not found by ID: {id}")
-            return jsonify({'error': 'Chart not found'}), 404
-
-        chart_data = fetch_chart_data(chart)
-        chart_dict = chart.serialize()
-        chart_dict['data'] = chart_data
-
-        return jsonify(chart_dict)
-    except Exception as e:
-        logging.error(f"Error in get_chart_by_id: {str(e)}")
-        return jsonify({'error': 'Internal server error'}), 500
-
-@api.route('/chart/<id>', methods=['GET'])
 def get_chart(id):
     logging.info(f"Fetching chart by ID: {id}")
     try:

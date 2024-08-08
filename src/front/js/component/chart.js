@@ -1,19 +1,54 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
-const Chart = ({ chartData, containerStyle, onClick }) => {
-  if (!chartData) {
+const Chart = ({ chartId, chartData, containerStyle, onClick }) => {
+  const [fetchedChartData, setFetchedChartData] = useState(null); // State for fetched data
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!chartData && chartId) {
+      const fetchChartById = async (id) => {
+        try {
+          const response = await fetch(`/api/chart/${id}`);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch chart: ${response.status} ${response.statusText}`);
+          }
+
+          const contentType = response.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Received non-JSON response");
+          }
+
+          const data = await response.json();
+          setFetchedChartData(data); // Update the state with fetched data
+        } catch (error) {
+          console.error('Error fetching chart:', error);
+          setError('Failed to load chart. Please try again later.');
+        }
+      };
+
+      fetchChartById(chartId);
+    }
+  }, [chartId, chartData]);
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  const dataToUse = fetchedChartData || chartData; // Determine which data to use
+
+  if (!dataToUse) {
     return <div>Loading chart...</div>;
   }
 
-  const { chartType, data, xAxisField, yAxisField, name } = chartData;
+  const { chartType, data, xAxisField, yAxisField, name } = dataToUse;
 
   const ChartComponent = chartType === 'line' ? LineChart : BarChart;
   const DataComponent = chartType === 'line' ? Line : Bar;
 
   const handleClick = () => {
     console.log(`Chart clicked: ${name}`); // Add console log to verify click
-    onClick(); // Call the onClick function passed as a prop
+    onClick(dataToUse); // Call the onClick function passed as a prop with the appropriate data
   };
 
   return (
