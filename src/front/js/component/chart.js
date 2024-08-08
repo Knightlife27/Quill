@@ -11,8 +11,13 @@ const Chart = ({ chartData, containerStyle, onClick }) => {
   const ChartComponent = chartType === 'line' ? LineChart : BarChart;
   const DataComponent = chartType === 'line' ? Line : Bar;
 
+  const handleClick = () => {
+    console.log(`Chart clicked: ${name}`); // Add console log to verify click
+    onClick(); // Call the onClick function passed as a prop
+  };
+
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle} onClick={handleClick}> {/* Use handleClick for onClick */}
       <h3>{name}</h3>
       <ChartComponent width={600} height={300} data={data}>
         <CartesianGrid strokeDasharray="3 3" />

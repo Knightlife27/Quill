@@ -135,7 +135,7 @@ const Dashboard = ({ name, containerStyle, onClickDashboardItem }) => {
             key={chart.id}
             chartData={chart}
             containerStyle={{ margin: '10px' }}
-            onClick={() => onClickDashboardItem(chart)}
+            onClick={() => onClickDashboardItem(chart)} // Pass the chart to the onClickDashboardItem callback
           />
         ))}
       </div>

@@ -5,12 +5,32 @@ from datetime import datetime, timedelta
 from sqlalchemy import func, inspect
 import logging
 
+
+logging.basicConfig(level=logging.INFO)
+
 api = Blueprint('api', __name__)
 
 @api.route('/dashboard/<name>', methods=['GET'])
 def get_dashboard(name):
     logging.info(f"Received request for dashboard: {name}")
     try:
+        # Extract startDate and endDate from request arguments
+        start_date = request.args.get('startDate')
+        end_date = request.args.get('endDate')
+
+        # If start_date or end_date is not provided, use default date range
+        if not start_date or not end_date:
+            logging.warning("Start date or end date is missing, using default date range")
+            dashboard = Dashboard.query.filter(func.lower(func.trim(Dashboard.name)) == func.lower(func.trim(name))).first()
+            if not dashboard:
+                logging.warning(f"Dashboard not found: {name}")
+                return jsonify({'error': 'Dashboard not found'}), 404
+
+            initial_date_range = dashboard.date_filter.get('initialDateRange', 'LAST_90_DAYS')
+            start_date, end_date = get_date_range(initial_date_range)
+        else:
+            logging.info(f"Using date range: {start_date} to {end_date}")
+
         logging.info(f"Searching for dashboard by name: {name}")
         dashboard = Dashboard.query.filter(func.lower(func.trim(Dashboard.name)) == func.lower(func.trim(name))).first()
         
@@ -21,13 +41,12 @@ def get_dashboard(name):
         logging.info(f"Dashboard found: {dashboard.name}")
         
         charts = Chart.query.filter_by(dashboard_name=dashboard.name).all()
-        initial_date_range = dashboard.date_filter['initialDateRange']
-        start_date, end_date = get_date_range(initial_date_range)
         
         charts_with_data = []
         for chart in charts:
             try:
                 logging.info(f"Fetching data for chart: {chart.name}")
+                # Pass the extracted start_date and end_date to fetch_chart_data
                 chart_data = fetch_chart_data(chart, start_date, end_date)
                 chart_dict = chart.serialize()
                 chart_dict['data'] = chart_data
@@ -49,44 +68,22 @@ def get_dashboard(name):
         traceback.print_exc()
         return jsonify({'error': 'Internal server error'}), 500
 
-@api.route('/dashboard/id/<id>', methods=['GET'])
-def get_dashboard_by_id(id):
-    logging.info(f"Fetching dashboard by ID: {id}")
+@api.route('/chart/<id>', methods=['GET'])
+def get_chart_by_id(id):
+    logging.info(f"Fetching chart by ID: {id}")
     try:
-        dashboard = Dashboard.query.get(id)
-        if not dashboard:
-            logging.warning(f"Dashboard not found by ID: {id}")
-            return jsonify({'error': 'Dashboard not found'}), 404
-        
-        logging.info(f"Dashboard found by ID: {dashboard.id}, Name: {dashboard.name}")
-        
-        charts = Chart.query.filter_by(dashboard_name=dashboard.name).all()
-        
-        initial_date_range = dashboard.date_filter['initialDateRange']
-        start_date, end_date = get_date_range(initial_date_range)
-        
-        charts_with_data = []
-        for chart in charts:
-            try:
-                logging.info(f"Fetching data for chart: {chart.name}")
-                chart_data = fetch_chart_data(chart, start_date, end_date)
-                chart_dict = chart.serialize()
-                chart_dict['data'] = chart_data
-                charts_with_data.append(chart_dict)
-            except Exception as e:
-                logging.error(f"Error fetching data for chart {chart.name}: {str(e)}")
-                import traceback
-                traceback.print_exc()
-                charts_with_data.append(chart.serialize())  # Add chart without data
-        
-        return jsonify({
-            'dashboard': dashboard.serialize(),
-            'charts': charts_with_data
-        })
+        chart = Chart.query.get(id)
+        if not chart:
+            logging.warning(f"Chart not found by ID: {id}")
+            return jsonify({'error': 'Chart not found'}), 404
+
+        chart_data = fetch_chart_data(chart)
+        chart_dict = chart.serialize()
+        chart_dict['data'] = chart_data
+
+        return jsonify(chart_dict)
     except Exception as e:
-        logging.error(f"Error in get_dashboard_by_id: {str(e)}")
-        import traceback
-        traceback.print_exc()
+        logging.error(f"Error in get_chart_by_id: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
 @api.route('/chart/<id>', methods=['GET'])
