@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import JSON
+import uuid
 
 db = SQLAlchemy()
 
@@ -20,8 +21,8 @@ class User(db.Model):
         }
 
 class Dashboard(db.Model):
-    id = db.Column(db.String, primary_key=True)
-    name = db.Column(db.String, unique=True, nullable=False)
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    name = db.Column(db.String(255), unique=True, nullable=False)
     date_filter = db.Column(JSON, nullable=False)
 
     def serialize(self):
@@ -32,7 +33,7 @@ class Dashboard(db.Model):
         }
 
 class Chart(db.Model):
-    id = db.Column(db.String, primary_key=True)
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String, nullable=False)
     dashboard_name = db.Column(db.String, db.ForeignKey('dashboard.name'), nullable=False)
     chart_type = db.Column(db.String, nullable=False)

@@ -2,6 +2,7 @@ from flask import jsonify, url_for
 from supabase import create_client, Client
 import os
 from datetime import datetime, timedelta
+import logging
 
 class APIException(Exception):
     status_code = 400
@@ -50,23 +51,38 @@ supabase: Client = create_client(url, key)
 
 def execute_sql_query(sql_query):
     try:
+        logging.info(f"Executing SQL query: {sql_query}")
         response = supabase.rpc('execute_sql', {'query': sql_query}).execute()
-        return response.data
+        
+        # Check if the response has data
+        if hasattr(response, 'data'):
+            logging.info(f"SQL query executed successfully, response: {response.data[:5]}...")  # Log first 5 rows
+            return [row['result'] for row in response.data]  # Extract 'result' from each row
+        else:
+            logging.error(f"Error executing SQL query: {response}")
+            raise APIException(f"Error executing SQL query: No data returned")
     except Exception as e:
+        logging.error(f"Exception in execute_sql_query: {str(e)}")
         raise APIException(f"Error executing SQL query: {str(e)}")
 
-def apply_date_filter(sql_query, date_field, start_date, end_date):
-    if not date_field or not start_date or not end_date:
-        return sql_query
-    
-    date_condition = f"WHERE {date_field} BETWEEN '{start_date}' AND '{end_date}'"
-    
-    if 'WHERE' in sql_query:
-        sql_query = sql_query.replace('WHERE', f'{date_condition} AND')
-    elif 'GROUP BY' in sql_query:
-        parts = sql_query.split('GROUP BY')
-        sql_query = f"{parts[0]} {date_condition} GROUP BY {parts[1]}"
-    else:
-        sql_query += f" {date_condition}"
-    
-    return sql_query
+def apply_date_filter(sql_query, table_name, date_field, start_date):
+    try:
+        # Assuming the end_date is always today
+        end_date = datetime.now().date()
+        
+        # Add WHERE clause for date filtering
+        date_filter = f" WHERE {table_name}.{date_field} BETWEEN '{start_date}' AND '{end_date}'"
+        
+        # Check if the query already has a WHERE clause
+        if "WHERE" in sql_query.upper():
+            # If it does, add the date filter with AND
+            filtered_query = sql_query.replace("WHERE", f"WHERE {table_name}.{date_field} BETWEEN '{start_date}' AND '{end_date}' AND", 1)
+        else:
+            # If it doesn't, add the date filter as a new WHERE clause
+            filtered_query = sql_query + date_filter
+        
+        logging.info(f"Filtered SQL query: {filtered_query}")
+        return filtered_query
+    except Exception as e:
+        logging.error(f"Exception in apply_date_filter: {str(e)}")
+        raise APIException(f"Error applying date filter: {str(e)}")

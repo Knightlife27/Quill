@@ -5,6 +5,8 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from dotenv import load_dotenv
 from supabase import create_client, Client
+from flask_sqlalchemy import SQLAlchemy
+from api.models import db
 
 # Load environment variables
 load_dotenv()
@@ -19,17 +21,19 @@ CORS(app)
 # Database configuration
 db_url = os.getenv("DATABASE_URL")
 if db_url is not None:
-    app.config['SQLALCHEMY_DATABASE_URI'] = db_url.replace(
-        "postgres://", "postgresql://")
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url.replace("postgres://", "postgresql://")
 else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/test.db"
+    raise ValueError("DATABASE_URL environment variable is not set")
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ECHO'] = True  # Added this line to enable SQL query logging
+app.config['SQLALCHEMY_ECHO'] = True  # Enable SQL query logging
 
-# Import models and initialize db after app creation
-from api.models import db
+# Initialize the database
 db.init_app(app)
+
+# Import models after db initialization
+from api.models import Dashboard, Chart
+
 MIGRATE = Migrate(app, db, compare_type=True)
 
 # Import and register blueprints
