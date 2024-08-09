@@ -259,8 +259,14 @@ def apply_date_filter(sql_query, table_name, date_field, start_date, end_date):
             # If it does, add the date filter with AND
             filtered_query = sql_query.replace("WHERE", f"WHERE {table_name}.{date_field} BETWEEN '{start_date}' AND '{end_date}' AND", 1)
         else:
-            # If it doesn't, add the date filter as a new WHERE clause
-            filtered_query = sql_query + date_filter
+            # If it doesn't have a WHERE clause, check for GROUP BY
+            if "GROUP BY" in sql_query.upper():
+                # Split the query to insert the WHERE clause before GROUP BY
+                parts = sql_query.split("GROUP BY")
+                filtered_query = f"{parts[0]}{date_filter} GROUP BY {parts[1]}"
+            else:
+                # Add the date filter as a new WHERE clause
+                filtered_query = sql_query + date_filter
         
         logging.info(f"Filtered SQL query: {filtered_query}")
         return filtered_query

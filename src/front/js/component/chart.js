@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { BACKEND_URL } from './backendURL';
+
 
 const Chart = ({ chartId, chartData, containerStyle, onClick }) => {
   const [fetchedChartData, setFetchedChartData] = useState(null); // State for fetched data
@@ -9,7 +11,7 @@ const Chart = ({ chartId, chartData, containerStyle, onClick }) => {
     if (!chartData && chartId) {
       const fetchChartById = async (chartId) => {
         try {
-          const response = await fetch(`/api/chart/${chartId}`);
+          const response = await fetch(`${BACKEND_URL}/api/chart/${chartId}`);
           if (!response.ok) {
             throw new Error(`Failed to fetch chart: ${response.status} ${response.statusText}`);
           }
