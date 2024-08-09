@@ -7,9 +7,9 @@ const Chart = ({ chartId, chartData, containerStyle, onClick }) => {
 
   useEffect(() => {
     if (!chartData && chartId) {
-      const fetchChartById = async (id) => {
+      const fetchChartById = async (chartId) => {
         try {
-          const response = await fetch(`/api/chart/${id}`);
+          const response = await fetch(`/api/chart/${chartId}`);
           if (!response.ok) {
             throw new Error(`Failed to fetch chart: ${response.status} ${response.statusText}`);
           }
