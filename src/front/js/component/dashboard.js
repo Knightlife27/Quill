@@ -4,6 +4,7 @@ import ChartInput from './chartInput'; // Import the ChartInput component
 import { subDays, startOfMonth, isWithinInterval } from 'date-fns';
 import { BACKEND_URL } from './backendURL';
 import DateRangePicker from './dateRangePicker';
+import DashboardSelector from './dashboardSelector';
 
 const PresetDateRangePicker = ({ onPresetChange }) => {
   const handlePresetChange = (event) => {
@@ -44,6 +45,7 @@ const Dashboard = ({ name, containerStyle, onClickDashboardItem }) => {
   const [dashboard, setDashboard] = useState(null);
   const [initialData, setInitialData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
+  const [selectedDashboard, setSelectedDashboard] = useState('');
   const [dateRange, setDateRange] = useState({
     startDate: subDays(new Date(), 90),
     endDate: new Date()
@@ -69,6 +71,10 @@ const Dashboard = ({ name, containerStyle, onClickDashboardItem }) => {
       console.error('Error fetching dashboard:', error);
       setError('Failed to load dashboard. Please try again later.');
     }
+  };
+
+  const handleDashboardSelect = (dashboardName) => {
+    setSelectedDashboard(dashboardName);
   };
 
   const handleDateChange = (newDateRange) => {
@@ -130,7 +136,8 @@ const Dashboard = ({ name, containerStyle, onClickDashboardItem }) => {
       <h2>{dashboard.dashboard.name}</h2>
       <PresetDateRangePicker onPresetChange={handleDateChange} />
       <DateRangePicker onChange={handleDateChange} />
-      
+      <DashboardSelector onSelectDashboard={handleDashboardSelect} />
+      {selectedDashboard && <Dashboard name={selectedDashboard} />}
       {/* Add the ChartInput component here */}
       <ChartInput />
 
