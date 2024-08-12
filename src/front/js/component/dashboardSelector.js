@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BACKEND_URL } from './backendURL'; // Ensure this path is correct
+import { BACKEND_URL } from './backendURL'; 
 
 const DashboardSelector = ({ onSelectDashboard }) => {
   const [dashboards, setDashboards] = useState([]);

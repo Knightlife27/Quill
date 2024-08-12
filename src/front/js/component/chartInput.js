@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Chart from './chart'; // Ensure the path is correct based on your project structure
+import Chart from './chart'; 
 
 const ChartInput = () => {
   const [chartId, setChartId] = useState('');

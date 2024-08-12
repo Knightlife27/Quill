@@ -1,11 +1,11 @@
 import requests
 
-# URL of the endpoint
+
 url = "http://127.0.0.1:3001/api/charts"
 
 try:
     response = requests.get(url)
-    response.raise_for_status()  # Raise an exception for HTTP errors
+    response.raise_for_status()  
     data = response.json()
     print("Response Data:")
     print(data)

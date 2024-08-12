@@ -17,10 +17,10 @@ const Layout = () => {
 
     if (!process.env.BACKEND_URL || process.env.BACKEND_URL === "") return <BackendURL />;
 
-    // Define the function to handle chart clicks
+   
     const handleChartClick = (chart) => {
         console.log('Chart clicked:', chart);
-        // Add any additional logic you want to execute when a chart is clicked
+       
     };
 
     return (

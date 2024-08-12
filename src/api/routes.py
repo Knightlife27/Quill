@@ -14,11 +14,9 @@ api = Blueprint('api', __name__)
 def get_dashboard(name):
     logging.info(f"Received request for dashboard: {name}")
     try:
-        # Extract startDate and endDate from request arguments
         start_date = request.args.get('startDate')
-        end_date = request.args.get('endDate')
+        end_date = request.args.get('endDate')   
 
-        # If start_date or end_date is not provided, use default date range
         if not start_date or not end_date:
             logging.warning("Start date or end date is missing, using default date range")
             dashboard = Dashboard.query.filter(func.lower(func.trim(Dashboard.name)) == func.lower(func.trim(name))).first()
@@ -46,7 +44,7 @@ def get_dashboard(name):
         for chart in charts:
             try:
                 logging.info(f"Fetching data for chart: {chart.name}")
-                # Pass the extracted start_date and end_date to fetch_chart_data
+                
                 chart_data = fetch_chart_data(chart, start_date, end_date)
                 chart_dict = chart.serialize()
                 chart_dict['data'] = chart_data
@@ -55,7 +53,7 @@ def get_dashboard(name):
                 logging.error(f"Error fetching data for chart {chart.name}: {str(e)}")
                 import traceback
                 traceback.print_exc()
-                charts_with_data.append(chart.serialize())  # Add chart without data
+                charts_with_data.append(chart.serialize())  
         
         logging.info(f"Successfully fetched data for dashboard: {dashboard.name}")
         return jsonify({
@@ -77,7 +75,7 @@ def get_chart(id):
             logging.warning(f"Chart not found: {id}")
             return jsonify({'error': 'Chart not found'}), 404
         
-        start_date, end_date = get_date_range('LAST_90_DAYS')  # Default to last 90 days
+        start_date, end_date = get_date_range('LAST_90_DAYS')  
         chart_data = fetch_chart_data(chart, start_date, end_date)
         chart_dict = chart.serialize()
         chart_dict['data'] = chart_data
@@ -207,7 +205,7 @@ def get_date_range(range_type):
     elif range_type == 'CURRENT_MONTH':
         return today.replace(day=1), today
     else:
-        return today - timedelta(days=90), today  # Default to last 90 days
+        return today - timedelta(days=90), today 
 
 def fetch_chart_data(chart, start_date=None, end_date=None):
     try:
@@ -218,54 +216,54 @@ def fetch_chart_data(chart, start_date=None, end_date=None):
         logging.info(f"Fetching data for chart: {chart.name}")
         if start_date is None or end_date is None:
             logging.error("Start date or end date is None")
-            return []  # Handle the case where dates are not provided
+            return []  
         
         logging.info(f"Date range: {start_date} to {end_date}")
         logging.info(f"SQL query before filter: {chart.sql_query}")
         
-        # Apply the date filter to the SQL query
+       
         filtered_query = apply_date_filter(chart.sql_query, table_name, field_name, start_date, end_date)
         logging.info(f"Filtered SQL query: {filtered_query}")
         
-        # Execute the filtered SQL query
+        
         data = execute_sql_query(filtered_query)
-        logging.info(f"Raw data fetched: {data[:5]}...")  # Log first 5 rows for debugging
+        logging.info(f"Raw data fetched: {data[:5]}...") 
         
         if not data:
             logging.warning(f"No data returned for chart: {chart.name}")
             return []
         
-        # Process the data for the chart
+        
         processed_data = [
             {chart.x_axis_field: row.get(chart.x_axis_field), chart.y_axis_field: row.get(chart.y_axis_field)}
             for row in data if chart.x_axis_field in row and chart.y_axis_field in row
         ]
-        logging.info(f"Processed data: {processed_data[:5]}...")  # Log first 5 rows for debugging
+        logging.info(f"Processed data: {processed_data[:5]}...") 
         
         return processed_data
     except Exception as e:
         logging.error(f"Error in fetch_chart_data: {str(e)}")
         import traceback
         traceback.print_exc()
-        return []  # Return an empty list instead of raising an exception
+        return []  
 
 def apply_date_filter(sql_query, table_name, date_field, start_date, end_date):
     try:
-        # Add WHERE clause for date filtering
+        
         date_filter = f" WHERE {table_name}.{date_field} BETWEEN '{start_date}' AND '{end_date}'"
         
-        # Check if the query already has a WHERE clause
+        
         if "WHERE" in sql_query.upper():
-            # If it does, add the date filter with AND
+            
             filtered_query = sql_query.replace("WHERE", f"WHERE {table_name}.{date_field} BETWEEN '{start_date}' AND '{end_date}' AND", 1)
         else:
-            # If it doesn't have a WHERE clause, check for GROUP BY
+            
             if "GROUP BY" in sql_query.upper():
-                # Split the query to insert the WHERE clause before GROUP BY
+                
                 parts = sql_query.split("GROUP BY")
                 filtered_query = f"{parts[0]}{date_filter} GROUP BY {parts[1]}"
             else:
-                # Add the date filter as a new WHERE clause
+                
                 filtered_query = sql_query + date_filter
         
         logging.info(f"Filtered SQL query: {filtered_query}")

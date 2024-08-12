@@ -1,4 +1,4 @@
-export const BACKEND_URL = 'https://musical-giggle-x5w45qppjpwghpg9p-3001.app.github.dev'; // Your Codespaces backend URL
+export const BACKEND_URL = 'https://musical-giggle-x5w45qppjpwghpg9p-3001.app.github.dev'; 
 
 import React from "react";
 import envFile from "../../../../docs/assets/env-file.png";

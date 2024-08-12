@@ -3,7 +3,7 @@ from supabase import create_client, Client
 import os
 from datetime import datetime, timedelta
 import logging
-from .models import Dashboard  # Assuming you have a models.py file with your ORM models
+from .models import Dashboard  
 from sqlalchemy import func
 
 class APIException(Exception):
@@ -56,7 +56,7 @@ def execute_sql_query(sql_query):
         
         if hasattr(response, 'data'):
             logging.info(f"SQL query executed successfully, response: {response.data[:5]}...")  # Log first 5 rows
-            return [row['result'] for row in response.data]  # Extract 'result' from each row
+            return [row['result'] for row in response.data]  
         else:
             logging.error(f"Error executing SQL query: {response}")
             raise APIException(f"Error executing SQL query: No data returned")
@@ -108,7 +108,7 @@ def get_dashboard_data(name, start_date, end_date):
     if not dashboard:
         return jsonify({'error': 'Dashboard not found'}), 404
     charts_with_data = []
-    for chart in dashboard.charts:  # Assuming Dashboard has a relationship with Chart
+    for chart in dashboard.charts: 
         chart_data = fetch_chart_data(chart, start_date, end_date)
         chart_dict = chart.serialize()
         chart_dict['data'] = chart_data
