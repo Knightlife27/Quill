@@ -17,7 +17,6 @@ const ChartInput = () => {
   return (
     <div>
       <form onSubmit={handleSubmit}>
-        <label htmlFor="chart-id-input">Enter Chart ID:</label>
         <input
           id="chart-id-input"
           type="text"

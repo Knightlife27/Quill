@@ -152,27 +152,25 @@ const Dashboard = ({ containerStyle, onClickDashboardItem }) => {
 
   return (
     <div className="container mx-auto p-4" style={containerStyle}>
-      <div className="mb-3">
-        <PresetDateRangePicker onPresetChange={handleDateChange} />
-      </div>
-      <div className="mb-3">
-        <DateRangePicker onChange={handleDateChange} />
-      </div>
-      <div className="mb-3">
-        <DashboardSelector onSelectDashboard={setSelectedDashboard} />
-      </div>
-      <div className="mb-3">
-        <ChartInput />
-      </div>
+     
 
+      
+<div className="row align-items-start">
+  <div className="col-md-4">
+    <DateRangePicker onChange={handleDateChange} />
+  </div>
+  <div className="col-md-4">
+    <DashboardSelector onSelectDashboard={setSelectedDashboard} />
+  </div>
+  <div className="col-md-4">
+    <ChartInput />
+  </div>
+</div>
       <div className="data-cards">
           {dataCards.map((card) => (
             <DataCard key={card.id} className={card.className} />
           ))}
         </div>
-
-
-
       <div className="flex flex-wrap -mx-3">
         {filteredData.map(chart => (
           <div className="w-full md:w-1/2 px-3 mb-3" key={chart.id}>
