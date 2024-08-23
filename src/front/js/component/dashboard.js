@@ -3,8 +3,9 @@ import Chart from './chart';
 import ChartInput from './chartInput'; // Import the ChartInput component
 import { subDays, startOfMonth, isWithinInterval } from 'date-fns';
 import { BACKEND_URL } from './backendURL';
-import DateRangePicker from './dateRangePicker';
+import DateRangePicker from './combinedDatePicker';
 import DashboardSelector from './dashboardSelector';
+import DataCard from './datacard';
 
 const PresetDateRangePicker = ({ onPresetChange }) => {
   const handlePresetChange = (event) => {
@@ -28,7 +29,7 @@ const PresetDateRangePicker = ({ onPresetChange }) => {
         startDate = subDays(new Date(), 90);
     }
 
-    // Ensure the time is set to cover the entire day
+    
     startDate.setHours(0, 0, 0, 0);
     endDate.setHours(23, 59, 59, 999);
 
@@ -56,6 +57,12 @@ const Dashboard = ({ containerStyle, onClickDashboardItem }) => {
     endDate: new Date()
   });
   const [error, setError] = useState(null);
+
+  const dataCards = [
+    { id: 1, className: 'data-card-1' },
+    { id: 2, className: 'data-card-2' },
+    { id: 3, className: 'data-card-3' },
+  ];
 
   useEffect(() => {
     fetchDashboard(selectedDashboard);
@@ -145,7 +152,6 @@ const Dashboard = ({ containerStyle, onClickDashboardItem }) => {
 
   return (
     <div className="container mx-auto p-4" style={containerStyle}>
-      <h2 className="text-2xl font-bold mb-4">{selectedDashboard}</h2>
       <div className="mb-3">
         <PresetDateRangePicker onPresetChange={handleDateChange} />
       </div>
@@ -158,6 +164,15 @@ const Dashboard = ({ containerStyle, onClickDashboardItem }) => {
       <div className="mb-3">
         <ChartInput />
       </div>
+
+      <div className="data-cards">
+          {dataCards.map((card) => (
+            <DataCard key={card.id} className={card.className} />
+          ))}
+        </div>
+
+
+
       <div className="flex flex-wrap -mx-3">
         {filteredData.map(chart => (
           <div className="w-full md:w-1/2 px-3 mb-3" key={chart.id}>
