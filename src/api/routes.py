@@ -68,6 +68,29 @@ api = Blueprint('api', __name__)
 #         traceback.print_exc()
 #         return jsonify({'error': 'Internal server error'}), 500
 
+def fetch_kpi_data(dashboard_id, start_date, end_date):
+    try:
+        logging.info(f"Fetching KPIs for dashboard_id: {dashboard_id}")
+        kpi_metrics = KPIMetric.query.filter(
+            KPIMetric.dashboard_id == dashboard_id,
+            KPIMetric.date.between(start_date, end_date)
+        ).all()
+
+        logging.info(f"Found {len(kpi_metrics)} KPI metrics")
+
+        kpis = {
+            'kpi1': next((kpi.serialize() for kpi in kpi_metrics if kpi.kpi_type == 'kpi1'), None),
+            'kpi2': next((kpi.serialize() for kpi in kpi_metrics if kpi.kpi_type == 'kpi2'), None),
+            'kpi3': next((kpi.serialize() for kpi in kpi_metrics if kpi.kpi_type == 'kpi3'), None)
+        }
+        logging.info(f"Processed KPIs: {kpis}")
+        return kpis
+    except Exception as e:
+        logging.warning(f"Error fetching KPI metrics: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return {}
+
 @api.route('/dashboard/<name>', methods=['GET'])
 def get_dashboard(name):
     logging.info(f"Received request for dashboard: {name}")
@@ -119,28 +142,8 @@ def get_dashboard(name):
                 traceback.print_exc()
                 charts_with_data.append(chart.serialize())  
         
-        # Fetch KPI metrics if the table exists
-        kpis = {}
-        try:
-            logging.info(f"Fetching KPIs for dashboard_id: {dashboard.id}")
-            kpi_metrics = KPIMetric.query.filter(
-                KPIMetric.dashboard_id == dashboard.id,
-                KPIMetric.date.between(start_date, end_date)
-            ).all()
-
-            logging.info(f"Found {len(kpi_metrics)} KPI metrics")
-
-            kpis = {
-                'kpi1': next((kpi.serialize() for kpi in kpi_metrics if kpi.kpi_type == 'kpi1'), None),
-                'kpi2': next((kpi.serialize() for kpi in kpi_metrics if kpi.kpi_type == 'kpi2'), None),
-                'kpi3': next((kpi.serialize() for kpi in kpi_metrics if kpi.kpi_type == 'kpi3'), None)
-            }
-            logging.info(f"Processed KPIs: {kpis}")
-        except Exception as e:
-            logging.warning(f"Error fetching KPI metrics: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            # If there's an error (e.g., table doesn't exist), we just leave kpis as an empty dict
+        # Fetch KPI metrics
+        kpis = fetch_kpi_data(dashboard.id, start_date, end_date)
         
         logging.info(f"Successfully fetched data for dashboard: {dashboard.name}")
         return jsonify({
@@ -153,6 +156,8 @@ def get_dashboard(name):
         import traceback
         traceback.print_exc()
         return jsonify({'error': 'Internal server error'}), 500
+    
+    
 
 @api.route('/chart/<id>', methods=['GET'])
 def get_chart(id):
@@ -334,10 +339,8 @@ def fetch_chart_data(chart, start_date=None, end_date=None):
         logging.info(f"Date range: {start_date} to {end_date}")
         logging.info(f"SQL query before filter: {chart.sql_query}")
         
-       
         filtered_query = apply_date_filter(chart.sql_query, table_name, field_name, start_date, end_date)
         logging.info(f"Filtered SQL query: {filtered_query}")
-        
         
         data = execute_sql_query(filtered_query)
         logging.info(f"Raw data fetched: {data[:5]}...") 
@@ -345,7 +348,6 @@ def fetch_chart_data(chart, start_date=None, end_date=None):
         if not data:
             logging.warning(f"No data returned for chart: {chart.name}")
             return []
-        
         
         processed_data = [
             {chart.x_axis_field: row.get(chart.x_axis_field), chart.y_axis_field: row.get(chart.y_axis_field)}
@@ -362,21 +364,15 @@ def fetch_chart_data(chart, start_date=None, end_date=None):
 
 def apply_date_filter(sql_query, table_name, date_field, start_date, end_date):
     try:
-        
         date_filter = f" WHERE {table_name}.{date_field} BETWEEN '{start_date}' AND '{end_date}'"
         
-        
         if "WHERE" in sql_query.upper():
-            
             filtered_query = sql_query.replace("WHERE", f"WHERE {table_name}.{date_field} BETWEEN '{start_date}' AND '{end_date}' AND", 1)
         else:
-            
             if "GROUP BY" in sql_query.upper():
-                
                 parts = sql_query.split("GROUP BY")
                 filtered_query = f"{parts[0]}{date_filter} GROUP BY {parts[1]}"
             else:
-                
                 filtered_query = sql_query + date_filter
         
         logging.info(f"Filtered SQL query: {filtered_query}")
