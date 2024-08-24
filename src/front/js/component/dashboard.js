@@ -6,6 +6,8 @@ import { BACKEND_URL } from './backendURL';
 import DateRangePicker from './combinedDatePicker';
 import DashboardSelector from './dashboardSelector';
 import DataCard from './datacard';
+import "../../styles/index.css"
+
 
 const PresetDateRangePicker = ({ onPresetChange }) => {
   const handlePresetChange = (event) => {
@@ -162,9 +164,9 @@ const Dashboard = ({ containerStyle, onClickDashboardItem }) => {
   <div className="col-md-4">
     <DashboardSelector onSelectDashboard={setSelectedDashboard} />
   </div>
-  <div className="col-md-4">
+  {/* <div className="col-md-4">
     <ChartInput />
-  </div>
+  </div> */}
 </div>
       <div className="data-cards">
           {dataCards.map((card) => (

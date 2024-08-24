@@ -29,7 +29,7 @@ const DashboardSelector = ({ onSelectDashboard }) => {
   };
 
   return (
-    <select value={selectedDashboard} onChange={handleChange}>
+    <select  value={selectedDashboard} onChange={handleChange}>
       <option value="" disabled>Select a Dashboard</option>
       {dashboards.map((dashboard) => (
         <option key={dashboard.id} value={dashboard.name}>

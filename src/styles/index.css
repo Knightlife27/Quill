@@ -1,127 +1,156 @@
 .main-layout {
-    background-color: #dbe8f4;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    align-items: center;
-    justify-content: center;
-    padding: 106px 80px;
-  }
-  
-  
-  .content-wrapper {
-    border-radius: 18px;
-    background-color: #fff;
-    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-    display: flex;
-    width: 100%;
-    max-width: 1135px;
-    flex-direction: column;
-    padding: 38px 46px 273px;
-  }
-  
-  /* @media (max-width: 991px) {
-    .content-wrapper {
-      max-width: 100%;
-      padding: 0 20px 100px;
-    }
-  }
-   */
-  .header {
-    display: flex;
-    width: 100%;
-    gap: 20px;
-    color: #000;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    font: 400 14px Roboto, sans-serif;
-  }
-  
-  /* @media (max-width: 991px) {
-    .header {
-      max-width: 100%;
-    }
-  } */
-  
-  .navigation {
-    display: flex;
-    gap: 37px;
-  }
-  
-  .nav-link {
-    text-decoration: none;
-    color: inherit;
-  }
-  
-  .nav-icon {
-    aspect-ratio: 1;
-    object-fit: contain;
-    object-position: center;
-    width: 24px;
-  }
-  
-  .card-grid {
-    align-self: center;
-    width: 70%;
-    max-width: 955px;
-    margin: 67px 0 -55px;
-    display: flex;
-    gap: 20px;
-  }
-/*   
-  @media (max-width: 991px) {
-    .card-grid {
-      max-width: 100%;
-      margin: 40px 0 10px;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 11px;
-    }
-  } */
+  background-color: #dbe8f4;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  padding: 106px 80px;
+}
 
+.content-wrapper {
+  border-radius: 18px;
+  background-color: #fff;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  display: flex;
+  width: 100%;
+  max-width: 1135px;
+  flex-direction: column;
+  padding: 38px 46px 273px;
+}
 
-  
-  .card-grid-container {
-    width: 30%;
-  }
-  
-  .card {
-    border-radius: 14px;
-    background-color: #fff;
-    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25);
-    display: flex;
-    width: 250px;
-    max-width: 100%;
-    height: 224px;
-    margin: 1px;
-    padding: 0;
-  }
-  
-  .visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
+.header {
+  display: flex;
+  width: 100%;
+  gap: 20px;
+  color: #000;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  font: 400 14px Roboto, sans-serif;
+}
+
+.combined-date-picker {
+  border-radius: 14px;
+  background-color: #fff;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25);
+  padding: 15px;
+  width: 100%;
+}
+
+.date-picker-button {
+  border-radius: 14px;
+  background-color: #fff;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25);
+  padding: 15px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.date-picker-dropdown {
+  margin-top: 10px;
+  border-radius: 14px;
+  background-color: #fff;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25);
+  padding: 15px;
+}
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.react-datepicker {
+  font-family: inherit;
+  border-radius: 14px;
+  border: none;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.react-datepicker__header {
+  background-color: #f0f0f0;
+  border-bottom: none;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--in-selecting-range,
+.react-datepicker__day--in-range {
+  background-color: #007bff;
+  color: white;
+}
+
+.react-datepicker__day:hover {
+  background-color: #e6f2ff;
+}
+
+.navigation {
+  display: flex;
+  gap: 37px;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.nav-icon {
+  aspect-ratio: 1;
+  object-fit: contain;
+  object-position: center;
+  width: 24px;
+}
+
+.card-grid {
+  align-self: center;
+  width: 70%;
+  max-width: 955px;
+  margin: 67px 0 -55px;
+  display: flex;
+  gap: 20px;
+}
+
+.card-grid-container {
+  width: 30%;
+}
+
+.card {
+  border-radius: 14px;
+  background-color: #fff;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25);
+  display: flex;
+  width: 250px;
+  max-width: 100%;
+  height: 224px;
+  margin: 1px;
+  padding: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 .chart-container {
-  display: flex; /* Make the container a flex container */
-  flex-wrap: wrap; /* Allow items to wrap to the next line if necessary */
-  gap: 60px; /* Optional: Add space between items */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 60px;
 }
 
 .chart-item {
-  flex: 1 1 calc(50% - 20px); /* Adjust the width of each item */
-  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  flex: 1 1 calc(50% - 20px);
+  box-sizing: border-box;
   width: 5%;
   margin-top: 10%;
 }
-
 
 .data-card {
   display: flex !important;
@@ -131,9 +160,10 @@
   width: 11px;
   height: 24px;
 }
+
 @media (max-width: 100px) {
   .data-card {
-    width: 20%;
+      width: 20%;
   }
 }
 
@@ -144,7 +174,7 @@
   justify-content: space-between;
   gap: 20px;
   width: 100%;
-  margin-top: 20px; /* Adjust as needed */
+  margin-top: 20px;
 }
 
 .control-row {
@@ -161,4 +191,9 @@
 
 .control-item:last-child {
   margin-right: 0;
+}
+
+.data-cards {
+  width: 100vw;
+  box-sizing: border-box;
 }
