@@ -9,6 +9,7 @@ import DataCard from './datacard';
 import "../../styles/index.css"
 
 
+
 const PresetDateRangePicker = ({ onPresetChange }) => {
   const handlePresetChange = (event) => {
     const preset = event.target.value;
@@ -91,6 +92,14 @@ const Dashboard = ({ containerStyle, onClickDashboardItem }) => {
     }
   };
 
+  useEffect(() => {
+    if (dashboard && dashboard.kpis) {
+      // Handle KPI data here
+      console.log('KPI data:', dashboard.kpis);
+      // Update state or render KPI components as needed
+    }
+  }, [dashboard]);
+
   const handleDateChange = (newDateRange) => {
     console.log(`New Date Range: ${newDateRange.startDate} to ${newDateRange.endDate}`);
     console.log(`Initial Fetch Range: ${initialFetchRange.startDate} to ${initialFetchRange.endDate}`);
@@ -154,25 +163,29 @@ const Dashboard = ({ containerStyle, onClickDashboardItem }) => {
 
   return (
     <div className="container mx-auto p-4" style={containerStyle}>
-     
-
-      
-<div className="row align-items-start">
-  <div className="col-md-4">
-    <DateRangePicker onChange={handleDateChange} />
-  </div>
-  <div className="col-md-4">
-    <DashboardSelector onSelectDashboard={setSelectedDashboard} />
-  </div>
-  {/* <div className="col-md-4">
-    <ChartInput />
-  </div> */}
-</div>
-      <div className="data-cards">
-          {dataCards.map((card) => (
-            <DataCard key={card.id} className={card.className} />
-          ))}
+      <div className="row align-items-start">
+        <div className="col-md-4">
+          <DateRangePicker onChange={handleDateChange} />
         </div>
+        <div className="col-md-4">
+          <DashboardSelector onSelectDashboard={setSelectedDashboard} />
+        </div>
+      </div>
+      <div className="data-cards">
+        {dashboard && dashboard.kpis ? (
+          <>
+            <DataCard className="data-card-1" kpiData={dashboard.kpis.kpi1} />
+            <DataCard className="data-card-2" kpiData={dashboard.kpis.kpi2} />
+            <DataCard className="data-card-3" kpiData={dashboard.kpis.kpi3} />
+          </>
+        ) : (
+          <>
+            <DataCard className="data-card-1" />
+            <DataCard className="data-card-2" />
+            <DataCard className="data-card-3" />
+          </>
+        )}
+      </div>
       <div className="flex flex-wrap -mx-3">
         {filteredData.map(chart => (
           <div className="w-full md:w-1/2 px-3 mb-3" key={chart.id}>

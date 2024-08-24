@@ -1,4 +1,4 @@
-import React from 'react';
+// import React from 'react';
 
 // const DataCard = ({ className }) => {
 //   return (
@@ -33,12 +33,22 @@ import React from 'react';
 
 // export default DataCard;
 
-const DataCard = ({ className }) => {
+import React from 'react';
+
+const DataCard = ({ className, kpiData }) => {
   return (
     <article className={`data-card ${className}`}>
+      {kpiData ? (
+        <>
+          <h3>{kpiData.metric_name}</h3>
+          <p className="kpi-value">{kpiData.metric_value} {kpiData.metric_unit}</p>
+        </>
+      ) : (
+        <p>No data available</p>
+      )}
       <style jsx>{`
         .data-card {
-          display: inline-block;
+          display: flex;
           flex-direction: column;
           justify-content: center;
           align-items: center;
@@ -50,8 +60,18 @@ const DataCard = ({ className }) => {
           padding: 20px;
           box-sizing: border-box;
           min-height: 200px;
+          text-align: center;
         }
 
+        h3 {
+          margin-bottom: 10px;
+          font-size: 1.2em;
+        }
+
+        .kpi-value {
+          font-size: 1.5em;
+          font-weight: bold;
+        }
 
         @media (max-width: 768px) {
           .data-card {

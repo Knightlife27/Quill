@@ -4,11 +4,69 @@ from .utils import APIException, execute_sql_query, apply_date_filter
 from datetime import datetime, timedelta
 from sqlalchemy import func, inspect
 import logging
+import uuid
+from .models import db, Dashboard, Chart, KPIMetric
 
 
 logging.basicConfig(level=logging.INFO)
 
 api = Blueprint('api', __name__)
+
+# @api.route('/dashboard/<name>', methods=['GET'])
+# def get_dashboard(name):
+#     logging.info(f"Received request for dashboard: {name}")
+#     try:
+#         start_date = request.args.get('startDate')
+#         end_date = request.args.get('endDate')   
+
+#         if not start_date or not end_date:
+#             logging.warning("Start date or end date is missing, using default date range")
+#             dashboard = Dashboard.query.filter(func.lower(func.trim(Dashboard.name)) == func.lower(func.trim(name))).first()
+#             if not dashboard:
+#                 logging.warning(f"Dashboard not found: {name}")
+#                 return jsonify({'error': 'Dashboard not found'}), 404
+
+#             initial_date_range = dashboard.date_filter.get('initialDateRange', 'LAST_90_DAYS')
+#             start_date, end_date = get_date_range(initial_date_range)
+#         else:
+#             logging.info(f"Using date range: {start_date} to {end_date}")
+
+#         logging.info(f"Searching for dashboard by name: {name}")
+#         dashboard = Dashboard.query.filter(func.lower(func.trim(Dashboard.name)) == func.lower(func.trim(name))).first()
+        
+#         if not dashboard:
+#             logging.warning(f"Dashboard not found: {name}")
+#             return jsonify({'error': 'Dashboard not found'}), 404
+        
+#         logging.info(f"Dashboard found: {dashboard.name}")
+        
+#         charts = Chart.query.filter_by(dashboard_name=dashboard.name).all()
+        
+#         charts_with_data = []
+#         for chart in charts:
+#             try:
+#                 logging.info(f"Fetching data for chart: {chart.name}")
+                
+#                 chart_data = fetch_chart_data(chart, start_date, end_date)
+#                 chart_dict = chart.serialize()
+#                 chart_dict['data'] = chart_data
+#                 charts_with_data.append(chart_dict)
+#             except Exception as e:
+#                 logging.error(f"Error fetching data for chart {chart.name}: {str(e)}")
+#                 import traceback
+#                 traceback.print_exc()
+#                 charts_with_data.append(chart.serialize())  
+        
+#         logging.info(f"Successfully fetched data for dashboard: {dashboard.name}")
+#         return jsonify({
+#             'dashboard': dashboard.serialize(),
+#             'charts': charts_with_data
+#         })
+#     except Exception as e:
+#         logging.error(f"Error in get_dashboard: {str(e)}")
+#         import traceback
+#         traceback.print_exc()
+#         return jsonify({'error': 'Internal server error'}), 500
 
 @api.route('/dashboard/<name>', methods=['GET'])
 def get_dashboard(name):
@@ -28,6 +86,12 @@ def get_dashboard(name):
             start_date, end_date = get_date_range(initial_date_range)
         else:
             logging.info(f"Using date range: {start_date} to {end_date}")
+            try:
+                start_date = datetime.strptime(start_date, '%Y-%m-%dT%H:%M:%S.%fZ').date()
+                end_date = datetime.strptime(end_date, '%Y-%m-%dT%H:%M:%S.%fZ').date()
+            except ValueError:
+                logging.error("Invalid date format")
+                return jsonify({'error': 'Invalid date format'}), 400
 
         logging.info(f"Searching for dashboard by name: {name}")
         dashboard = Dashboard.query.filter(func.lower(func.trim(Dashboard.name)) == func.lower(func.trim(name))).first()
@@ -55,10 +119,34 @@ def get_dashboard(name):
                 traceback.print_exc()
                 charts_with_data.append(chart.serialize())  
         
+        # Fetch KPI metrics if the table exists
+        kpis = {}
+        try:
+            logging.info(f"Fetching KPIs for dashboard_id: {dashboard.id}")
+            kpi_metrics = KPIMetric.query.filter(
+                KPIMetric.dashboard_id == dashboard.id,
+                KPIMetric.date.between(start_date, end_date)
+            ).all()
+
+            logging.info(f"Found {len(kpi_metrics)} KPI metrics")
+
+            kpis = {
+                'kpi1': next((kpi.serialize() for kpi in kpi_metrics if kpi.kpi_type == 'kpi1'), None),
+                'kpi2': next((kpi.serialize() for kpi in kpi_metrics if kpi.kpi_type == 'kpi2'), None),
+                'kpi3': next((kpi.serialize() for kpi in kpi_metrics if kpi.kpi_type == 'kpi3'), None)
+            }
+            logging.info(f"Processed KPIs: {kpis}")
+        except Exception as e:
+            logging.warning(f"Error fetching KPI metrics: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            # If there's an error (e.g., table doesn't exist), we just leave kpis as an empty dict
+        
         logging.info(f"Successfully fetched data for dashboard: {dashboard.name}")
         return jsonify({
             'dashboard': dashboard.serialize(),
-            'charts': charts_with_data
+            'charts': charts_with_data,
+            'kpis': kpis
         })
     except Exception as e:
         logging.error(f"Error in get_dashboard: {str(e)}")
@@ -85,6 +173,31 @@ def get_chart(id):
         import traceback
         traceback.print_exc()
         return jsonify({'error': 'Internal server error'}), 500
+    
+@api.route('/create-kpi-metric', methods=['POST'])
+def create_kpi_metric():
+    logging.info("Creating new KPI metric")
+    try:
+        data = request.get_json()
+        new_kpi = KPIMetric(
+            id=uuid.uuid4(),
+            dashboard_id=uuid.UUID(data['dashboard_id']),
+            kpi_type=data['kpi_type'],
+            metric_name=data['metric_name'],
+            metric_value=data['metric_value'],
+            metric_unit=data.get('metric_unit'),
+            date=datetime.strptime(data['date'], '%Y-%m-%d').date()
+        )
+        db.session.add(new_kpi)
+        db.session.commit()
+        logging.info(f"KPI metric created with ID: {new_kpi.id}")
+        return jsonify({"message": "KPI metric created", "id": str(new_kpi.id)}), 201
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error creating KPI metric: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Failed to create KPI metric: {str(e)}"}), 500
 
 @api.route('/dashboards', methods=['GET'])
 def list_all_dashboards():
@@ -271,3 +384,5 @@ def apply_date_filter(sql_query, table_name, date_field, start_date, end_date):
     except Exception as e:
         logging.error(f"Exception in apply_date_filter: {str(e)}")
         raise APIException(f"Error applying date filter: {str(e)}")
+    
+    
