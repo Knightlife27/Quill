@@ -32,7 +32,7 @@
 //         startDate = subDays(new Date(), 90);
 //     }
 
-    
+
 //     startDate.setHours(0, 0, 0, 0);
 //     endDate.setHours(23, 59, 59, 999);
 
@@ -104,14 +104,14 @@
 //   const handleDateChange = (newDateRange) => {
 //     console.log(`New Date Range: ${newDateRange.startDate} to ${newDateRange.endDate}`);
 //     console.log(`Initial Fetch Range: ${initialFetchRange.startDate} to ${initialFetchRange.endDate}`);
-    
+
 //     setDateRange(newDateRange);
-  
+
 //     if (dashboard && initialData.length > 0) {
 //       const isWithinInitialRange = 
 //         newDateRange.startDate >= initialFetchRange.startDate && 
 //         newDateRange.endDate <= initialFetchRange.endDate;
-  
+
 //       if (isWithinInitialRange) {
 //         console.log('Filtering data on the frontend');
 //         const filteredCharts = initialData.map(chart => ({
@@ -123,7 +123,7 @@
 //         }));
 //         console.log('Filtered Charts:', filteredCharts);
 //         setFilteredData(filteredCharts);
-  
+
 //         // Update KPIs based on the new date range
 //         if (dashboard.kpis) {
 //           const updatedKpis = updateKpisForDateRange(dashboard.kpis, newDateRange);
@@ -149,12 +149,12 @@
 //     try {
 //       console.log(`Fetching new data for range: ${newDateRange.startDate.toISOString()} to ${newDateRange.endDate.toISOString()}`);
 //       const response = await fetch(`${BACKEND_URL}/api/dashboard/${encodeURIComponent(selectedDashboard)}?startDate=${newDateRange.startDate.toISOString()}&endDate=${newDateRange.endDate.toISOString()}`);
-      
+
 //       const contentType = response.headers.get("content-type");
 //       if (!response.ok || !contentType || !contentType.includes("application/json")) {
 //         throw new Error('Failed to fetch new data or invalid response format');
 //       }
-      
+
 //       const data = await response.json();
 //       console.log('Fetched New Data:', data);
 //       setDashboard(data);
@@ -246,7 +246,7 @@ const PresetDateRangePicker = ({ onPresetChange }) => {
       default:
         startDate = subDays(new Date(), 90);
     }
-    
+
     startDate.setHours(0, 0, 0, 0);
     endDate.setHours(23, 59, 59, 999);
 
@@ -287,7 +287,7 @@ const Dashboard = ({ containerStyle, onClickDashboardItem }) => {
 
   const fetchDashboard = async (dashboardName) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/dashboard/${encodeURIComponent(dashboardName)}?startDate=${dateRange.startDate.toISOString()}&endDate=${dateRange.endDate.toISOString()}`);
+      const response = await fetch(`${BACKEND_URL}api/dashboard/${encodeURIComponent(dashboardName)}?startDate=${dateRange.startDate.toISOString()}&endDate=${dateRange.endDate.toISOString()}`);
       if (!response.ok) {
         throw new Error('Failed to fetch dashboard');
       }
@@ -315,14 +315,14 @@ const Dashboard = ({ containerStyle, onClickDashboardItem }) => {
   const handleDateChange = (newDateRange) => {
     console.log(`New Date Range: ${newDateRange.startDate} to ${newDateRange.endDate}`);
     console.log(`Initial Fetch Range: ${initialFetchRange.startDate} to ${initialFetchRange.endDate}`);
-    
+
     setDateRange(newDateRange);
-  
+
     if (dashboard && initialData.length > 0) {
-      const isWithinInitialRange = 
-        newDateRange.startDate >= initialFetchRange.startDate && 
+      const isWithinInitialRange =
+        newDateRange.startDate >= initialFetchRange.startDate &&
         newDateRange.endDate <= initialFetchRange.endDate;
-  
+
       if (isWithinInitialRange) {
         console.log('Filtering data on the frontend');
         const filteredCharts = initialData.map(chart => ({
@@ -334,7 +334,7 @@ const Dashboard = ({ containerStyle, onClickDashboardItem }) => {
         }));
         console.log('Filtered Charts:', filteredCharts);
         setFilteredData(filteredCharts);
-  
+
         // Update KPIs based on the new date range
         if (dashboard.kpis) {
           const filteredKpis = Object.fromEntries(
@@ -370,12 +370,12 @@ const Dashboard = ({ containerStyle, onClickDashboardItem }) => {
     try {
       console.log(`Fetching new data for range: ${newDateRange.startDate.toISOString()} to ${newDateRange.endDate.toISOString()}`);
       const response = await fetch(`${BACKEND_URL}/api/dashboard/${encodeURIComponent(selectedDashboard)}?startDate=${newDateRange.startDate.toISOString()}&endDate=${newDateRange.endDate.toISOString()}`);
-      
+
       const contentType = response.headers.get("content-type");
       if (!response.ok || !contentType || !contentType.includes("application/json")) {
         throw new Error('Failed to fetch new data or invalid response format');
       }
-      
+
       const data = await response.json();
       console.log('Fetched New Data:', data);
       setDashboard(data);
@@ -405,9 +405,13 @@ const Dashboard = ({ containerStyle, onClickDashboardItem }) => {
       <div className="data-cards">
         {dashboard && dashboard.kpis ? (
           <>
-            <DataCard className="data-card-1" kpiData={dashboard.kpis.kpi1} />
-            <DataCard className="data-card-2" kpiData={dashboard.kpis.kpi2} />
-            <DataCard className="data-card-3" kpiData={dashboard.kpis.kpi3} />
+            <div className="container-fluid">
+              <div className="row">
+                <DataCard className="data-card-1" kpiData={dashboard.kpis.kpi1} />
+                <DataCard className="data-card-2" kpiData={dashboard.kpis.kpi2} />
+                <DataCard className="data-card-3" kpiData={dashboard.kpis.kpi3} />
+              </div>
+            </div>
           </>
         ) : (
           <>
@@ -419,12 +423,19 @@ const Dashboard = ({ containerStyle, onClickDashboardItem }) => {
       </div>
       <div className="flex flex-wrap -mx-3">
         {filteredData.map(chart => (
-          <div className="w-full md:w-1/2 px-3 mb-3" key={chart.id}>
-            <Chart
-              chartData={chart}
-              containerStyle={{ margin: '10px' }}
-              onClick={() => onClickDashboardItem(chart)}
-            />
+          <div className="container-fluid" key={chart.id}>
+            <div className="row">
+              <div className="col-md-6">
+                <div className="w-100">
+              
+                <Chart
+                  chartData={chart}
+                  // containerStyle={{ margin: '10px' }}
+                  onClick={() => onClickDashboardItem(chart)}
+                />
+                </div>
+              </div>
+            </div>
           </div>
         ))}
       </div>

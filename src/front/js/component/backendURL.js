@@ -1,4 +1,4 @@
-export const BACKEND_URL = 'https://musical-giggle-x5w45qppjpwghpg9p-3001.app.github.dev'; 
+export const BACKEND_URL = 'https://urban-trout-q7qx7g44w69729j4r-3001.app.github.dev/'; 
 
 import React from "react";
 import envFile from "../../../../docs/assets/env-file.png";
