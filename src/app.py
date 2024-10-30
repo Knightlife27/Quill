@@ -1,12 +1,14 @@
 import os
-from flask import Flask, request, jsonify, url_for, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory
 from flask_migrate import Migrate
-from flask_swagger import swagger
 from flask_cors import CORS
 from dotenv import load_dotenv
 from supabase import create_client, Client
-from flask_sqlalchemy import SQLAlchemy
-from api.models import db
+from api.models import db, Dashboard, Chart
+from api.routes import api
+from api.admin import setup_admin
+from api.commands import setup_commands
+from api.utils import APIException, generate_sitemap
 
 # Load environment variables
 load_dotenv()
@@ -30,26 +32,14 @@ app.config['SQLALCHEMY_ECHO'] = True  # Enable SQL query logging
 
 # Initialize the database
 db.init_app(app)
-
-# Import models after db initialization
-from api.models import Dashboard, Chart
-
 MIGRATE = Migrate(app, db, compare_type=True)
 
-# Import and register blueprints
-from api.routes import api
+# Register blueprints
 app.register_blueprint(api, url_prefix='/api')
 
-# Import and setup admin
-from api.admin import setup_admin
+# Setup admin and commands
 setup_admin(app)
-
-# Import and setup commands
-from api.commands import setup_commands
 setup_commands(app)
-
-# Import utils
-from api.utils import APIException, generate_sitemap
 
 # Environment setup
 ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
@@ -89,6 +79,31 @@ def get_charts():
         return jsonify(response.data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# Route to fetch all dashboards
+@app.route('/api/dashboards', methods=['GET'])
+def list_all_dashboards():
+    try:
+        dashboards = Dashboard.query.all()
+        return jsonify([{'id': d.id, 'name': d.name} for d in dashboards])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Route to fetch a specific dashboard
+@app.route('/api/dashboards/<int:dashboard_id>', methods=['GET'])
+def get_dashboard(dashboard_id):
+    try:
+        dashboard = Dashboard.query.get(dashboard_id)
+        if dashboard:
+            return jsonify({
+                'id': dashboard.id,
+                'name': dashboard.name,
+                'charts': [{'id': c.id, 'name': c.name} for c in dashboard.charts]
+            })
+        else:
+            return jsonify({'error': 'Dashboard not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # This only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':

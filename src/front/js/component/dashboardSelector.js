@@ -8,7 +8,7 @@ const DashboardSelector = ({ onSelectDashboard }) => {
   useEffect(() => {
     const fetchDashboards = async () => {
       try {
-        const response = await fetch(`${BACKEND_URL}/api/dashboards`);
+        const response = await fetch(`${process.env.BACKEND_URL}/api/dashboards`);
         if (!response.ok) {
           throw new Error('Failed to fetch dashboards');
         }
