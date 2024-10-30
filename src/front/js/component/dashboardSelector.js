@@ -8,7 +8,13 @@ const DashboardSelector = ({ onSelectDashboard }) => {
   useEffect(() => {
     const fetchDashboards = async () => {
       try {
-        const response = await fetch(`${process.env.BACKEND_URL}/api/dashboards`);
+        const response = await fetch(`${BACKEND_URL}/api/dashboards`, {
+          mode: 'cors',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch dashboards');
         }
@@ -29,7 +35,7 @@ const DashboardSelector = ({ onSelectDashboard }) => {
   };
 
   return (
-    <select  value={selectedDashboard} onChange={handleChange}>
+    <select value={selectedDashboard} onChange={handleChange}>
       <option value="" disabled>Select a Dashboard</option>
       {dashboards.map((dashboard) => (
         <option key={dashboard.id} value={dashboard.name}>
