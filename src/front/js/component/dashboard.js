@@ -70,7 +70,7 @@ const Dashboard = ({ containerStyle, onClickDashboardItem }) => {
 
   const fetchDashboard = async (dashboardName) => {
     try {
-      const response = await fetch(`${BACKEND_URL}api/dashboard/${encodeURIComponent(dashboardName)}?startDate=${dateRange.startDate.toISOString()}&endDate=${dateRange.endDate.toISOString()}`, {
+      const response = await fetch(`${process.env.BACKEND_URL}/api/dashboard/${encodeURIComponent(dashboardName)}?startDate=${dateRange.startDate.toISOString()}&endDate=${dateRange.endDate.toISOString()}`, {
         mode: 'cors',
         credentials: 'include',
         headers: {
@@ -158,7 +158,7 @@ const Dashboard = ({ containerStyle, onClickDashboardItem }) => {
 
     try {
       console.log(`Fetching new data for range: ${newDateRange.startDate.toISOString()} to ${newDateRange.endDate.toISOString()}`);
-      const response = await fetch(`${BACKEND_URL}/api/dashboard/${encodeURIComponent(selectedDashboard)}?startDate=${newDateRange.startDate.toISOString()}&endDate=${newDateRange.endDate.toISOString()}`, {
+      const response = await fetch(`${process.env.BACKEND_URL}/api/dashboard/${encodeURIComponent(selectedDashboard)}?startDate=${newDateRange.startDate.toISOString()}&endDate=${newDateRange.endDate.toISOString()}`, {
         mode: 'cors',
         credentials: 'include',
         headers: {

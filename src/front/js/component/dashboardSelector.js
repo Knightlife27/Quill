@@ -8,7 +8,7 @@ const DashboardSelector = ({ onSelectDashboard }) => {
   useEffect(() => {
     const fetchDashboards = async () => {
       try {
-        const response = await fetch(`${BACKEND_URL}/api/dashboards`, {
+        const response = await fetch(`${process.env.BACKEND_URL}/api/dashboards`, {
           mode: 'cors',
           credentials: 'include',
           headers: {
