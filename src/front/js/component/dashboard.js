@@ -70,13 +70,7 @@ const Dashboard = ({ containerStyle, onClickDashboardItem }) => {
 
   const fetchDashboard = async (dashboardName) => {
     try {
-      const response = await fetch(`${process.env.BACKEND_URL}/api/dashboard/${encodeURIComponent(dashboardName)}?startDate=${dateRange.startDate.toISOString()}&endDate=${dateRange.endDate.toISOString()}`, {
-        mode: 'cors',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(`${process.env.BACKEND_URL}/api/dashboard/${encodeURIComponent(dashboardName)}?startDate=${dateRange.startDate.toISOString()}&endDate=${dateRange.endDate.toISOString()}`);
       if (!response.ok) {
         throw new Error('Failed to fetch dashboard');
       }

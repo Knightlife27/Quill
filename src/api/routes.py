@@ -93,6 +93,7 @@ def fetch_kpi_data(dashboard_id, start_date, end_date):
 
 @api.route('/dashboard/<name>', methods=['GET'])
 def get_dashboard(name):
+    print("test ----------------------------------------------------------------------")
     logging.info(f"Received request for dashboard: {name}")
     try:
         start_date = request.args.get('startDate')

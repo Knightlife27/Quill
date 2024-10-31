@@ -51,30 +51,32 @@ db.init_app(app)
 MIGRATE = Migrate(app, db, compare_type=True)
 
 # CORS Configuration
-cors = CORS(app, resources={
-    r"/api/*": {
-        "origins": [
-            "https://datadesk-io-47ep.onrender.com",
-            "http://localhost:3000",
-            "http://localhost:3001"
-        ],
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": True,
-        "max_age": 600  # Cache preflight requests for 10 minutes
-    }
-})
+# cors = CORS(app, resources={
+#     r"/api/*": {
+#         "origins": [
+#             "https://datadesk-io-47ep.onrender.com",
+#             "http://localhost:3000",
+#             "http://localhost:3001"
+#         ],
+#         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+#         "allow_headers": ["Content-Type", "Authorization"],
+#         "supports_credentials": True,
+#         "max_age": 600  # Cache preflight requests for 10 minutes
+#     }
+# })
+
+CORS(app)
 
 # Error Handling for CORS
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
-    if request.method == 'OPTIONS':
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-        headers = request.headers.get('Access-Control-Request-Headers')
-        if headers:
-            response.headers['Access-Control-Allow-Headers'] = headers
-    return response
+# @app.after_request
+# def after_request(response):
+#     response.headers.add('Access-Control-Allow-Credentials', 'true')
+#     if request.method == 'OPTIONS':
+#         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+#         headers = request.headers.get('Access-Control-Request-Headers')
+#         if headers:
+#             response.headers['Access-Control-Allow-Headers'] = headers
+#     return response
 
 # Register blueprints
 app.register_blueprint(api, url_prefix='/api')
@@ -130,31 +132,31 @@ def get_charts():
         return jsonify({"error": str(e)}), 500
 
 # Route to fetch all dashboards
-@app.route('/api/dashboards', methods=['GET'])
-def list_all_dashboards():
-    try:
-        dashboards = Dashboard.query.all()
-        return jsonify([{'id': d.id, 'name': d.name} for d in dashboards])
-    except Exception as e:
-        logger.error(f"Error fetching dashboards: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+# @app.route('/api/dashboards', methods=['GET'])
+# def list_all_dashboards():
+#     try:
+#         dashboards = Dashboard.query.all()
+#         return jsonify([{'id': d.id, 'name': d.name} for d in dashboards])
+#     except Exception as e:
+#         logger.error(f"Error fetching dashboards: {str(e)}")
+#         return jsonify({'error': str(e)}), 500
 
-# Route to fetch a specific dashboard
-@app.route('/api/dashboards/<int:dashboard_id>', methods=['GET'])
-def get_dashboard(dashboard_id):
-    try:
-        dashboard = Dashboard.query.get(dashboard_id)
-        if dashboard:
-            return jsonify({
-                'id': dashboard.id,
-                'name': dashboard.name,
-                'charts': [{'id': c.id, 'name': c.name} for c in dashboard.charts]
-            })
-        else:
-            return jsonify({'error': 'Dashboard not found'}), 404
-    except Exception as e:
-        logger.error(f"Error fetching dashboard {dashboard_id}: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+# # Route to fetch a specific dashboard
+# @app.route('/api/dashboards/<int:dashboard_id>', methods=['GET'])
+# def get_dashboard(dashboard_id):
+#     try:
+#         dashboard = Dashboard.query.get(dashboard_id)
+#         if dashboard:
+#             return jsonify({
+#                 'id': dashboard.id,
+#                 'name': dashboard.name,
+#                 'charts': [{'id': c.id, 'name': c.name} for c in dashboard.charts]
+#             })
+#         else:
+#             return jsonify({'error': 'Dashboard not found'}), 404
+#     except Exception as e:
+#         logger.error(f"Error fetching dashboard {dashboard_id}: {str(e)}")
+#         return jsonify({'error': str(e)}), 500
 
 # This only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
