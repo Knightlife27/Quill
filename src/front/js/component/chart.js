@@ -11,7 +11,7 @@ const Chart = ({ chartId, chartData, containerStyle, onClick }) => {
     if (!chartData && chartId) {
       const fetchChartById = async (chartId) => {
         try {
-          const response = await fetch(`${BACKEND_URL}/api/chart/${chartId}`);
+          const response = await fetch(`${process.env.BACKEND_URL}/api/chart/${chartId}`);
           if (!response.ok) {
             throw new Error(`Failed to fetch chart: ${response.status} ${response.statusText}`);
           }

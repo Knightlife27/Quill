@@ -153,11 +153,6 @@ const Dashboard = ({ containerStyle, onClickDashboardItem }) => {
     try {
       console.log(`Fetching new data for range: ${newDateRange.startDate.toISOString()} to ${newDateRange.endDate.toISOString()}`);
       const response = await fetch(`${process.env.BACKEND_URL}/api/dashboard/${encodeURIComponent(selectedDashboard)}?startDate=${newDateRange.startDate.toISOString()}&endDate=${newDateRange.endDate.toISOString()}`, {
-        mode: 'cors',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
 
       const contentType = response.headers.get("content-type");
